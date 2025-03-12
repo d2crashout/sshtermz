@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web SSH Client</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #terminal-container { width: 80%; height: 400px; margin: auto; border: 1px solid #000; background: #000; }
+        input, button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h2>SSH Web Client</h2>
+    <input type="text" id="host" placeholder="SSH Host">
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="connectSSH()">Connect</button>
+    
+    <div id="terminal-container"></div>
+    
+    <script>
+        let ws;
+        const term = new Terminal({
+            cursorBlink: true,
+            fontSize: 14,
+            theme: { background: '#000000' }
+        });
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal-container'));
+        fitAddon.fit();
+
+        function connectSSH() {
+            const host = document.getElementById('host').value || "";
+            const username = document.getElementById('username').value || "";
+            const password = document.getElementById('password').value || "";
+            
+            ws = new WebSocket("wss://sshterm.onrender.com"); // Replace with your backend WebSocket URL
+            
+            ws.onopen = () => {
+                ws.send(JSON.stringify({ type: "connect", host, username, password }));
+                term.write("\r\nConnecting to SSH...\r\n");
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === "output") {
+                    term.write(data.message);
+                } else if (data.type === "status") {
+                    term.write("\r\n" + data.message + "\r\n");
+                } else if (data.type === "error") {
+                    term.write("\r\nError: " + data.message + "\r\n");
+                }
+            };
+            
+            ws.onerror = () => {
+                term.write("\r\nWebSocket connection error.\r\n");
+            };
+            
+            ws.onclose = () => {
+                term.write("\r\nConnection closed.\r\n");
+            };
+            
+            term.onData(data => {
+                ws.send(JSON.stringify({ type: "command", message: data }));
+            });
+        }
+    </script>
+</body>
+</html>
