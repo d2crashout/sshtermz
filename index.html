@@ -62,9 +62,16 @@
                 term.write("\r\nConnection closed.\r\n");
             };
             
+            let commandBuffer = "";
             term.onData(data => {
-                ws.send(JSON.stringify({ type: "command", message: data }));
+                if (data === "\r") { // Enter key
+                    ws.send(JSON.stringify({ type: "command", message: commandBuffer }));
+                    commandBuffer = ""; // Reset buffer after sending
+                } else {
+                    commandBuffer += data;
+                }
             });
+
         }
     </script>
 </body>
