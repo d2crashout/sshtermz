@@ -31,7 +31,7 @@
             background-color: white;
             color: black;
             border: 2px solid #04AA6D;
-            padding: 12px 28px;
+            padding: 14px 40px;
             border-radius: 4px;
             transition-duration: 0.4s;
         }
@@ -91,7 +91,9 @@
             const secretPasscode = secretPasscodeBox.value;
 
             if (secretPasscode == 'amongus'){
-            
+                
+                alert("Correct password!!!");
+                document.getElementById('button1').className = "disabled";
                 ws = new WebSocket("wss://sshterm.onrender.com"); // Replace with your backend WebSocket URL
             
                 ws.onopen = () => {
