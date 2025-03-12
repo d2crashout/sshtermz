@@ -68,11 +68,17 @@
                     term.write("\r\n"); // Move to a new line
                     ws.send(JSON.stringify({ type: "command", message: commandBuffer }));
                     commandBuffer = ""; // Reset buffer after sending
+                } else if (data === "\u007F") { // Backspace key
+                    if (commandBuffer.length > 0) {
+                        commandBuffer = commandBuffer.slice(0, -1); // Remove last character
+                        term.write("\b \b"); // Move cursor back, erase character
+                    }
                 } else {
                     commandBuffer += data;
                     term.write(data); // Echo the typed character
                 }
             });
+
 
         }
     </script>
