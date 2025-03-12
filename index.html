@@ -9,12 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        #terminal-container { width: 80%; height: 400px; margin: auto; border: 1px solid #000; background: #000; }
+        #terminal-container { 
+            width: 80%; 
+            height: 400px; 
+            margin: auto; 
+            border: 1px solid #000; 
+            background: #000; 
+            text-align: left; /* Align text to the left */
+            display: flex; /* Ensure content stays aligned */
+            justify-content: flex-start;
+            padding: 5px;
+        }
         input, button { margin: 5px; padding: 10px; }
     </style>
 </head>
 <body>
     <h2>SSH Web Client</h2>
+    <input type="text" id="host" placeholder="Type in the secret passcode.">
     <button onclick="connectSSH()">Connect</button>
     
     <div id="terminal-container"></div>
@@ -31,55 +42,62 @@
         term.open(document.getElementById('terminal-container'));
         fitAddon.fit();
 
+        let commandBuffer = "";
+        term.onData(data => {
+            if (data === "\r") { // Enter key
+                term.write("\r\n"); // Move to a new line
+                ws.send(JSON.stringify({ type: "command", message: commandBuffer }));
+                commandBuffer = ""; // Reset buffer after sending
+            } else if (data === "\u007F") { // Backspace key
+                if (commandBuffer.length > 0) {
+                    commandBuffer = commandBuffer.slice(0, -1); // Remove last character
+                    term.write("\b \b"); // Move cursor back, erase character
+                }
+            } else {
+                commandBuffer += data;
+                term.write(data); // Echo the typed character
+            }
+        });
+
         function connectSSH() {
             const host = "";
             const username = "";
             const password = "";
+            const secretPasscodeBox = document.getElementById('host');
+            const secretPasscode = secretPasscodeBox.value;
+
+            if (secretPasscode == 'amongus'){
             
-            ws = new WebSocket("wss://sshterm.onrender.com"); // Replace with your backend WebSocket URL
+                ws = new WebSocket("wss://sshterm.onrender.com"); // Replace with your backend WebSocket URL
             
-            ws.onopen = () => {
-                ws.send(JSON.stringify({ type: "connect", host, username, password }));
-                term.write("\r\nConnecting to SSH...\r\n");
-            };
+                ws.onopen = () => {
+                    ws.send(JSON.stringify({ type: "connect", host, username, password }));
+                    term.write("\r\nConnecting to SSH...\r\n");
+                };
             
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.type === "output") {
-                    term.write(data.message);
-                } else if (data.type === "status") {
-                    term.write("\r\n" + data.message + "\r\n");
-                } else if (data.type === "error") {
-                    term.write("\r\nError: " + data.message + "\r\n");
-                }
-            };
-            
-            ws.onerror = () => {
-                term.write("\r\nWebSocket connection error.\r\n");
-            };
-            
-            ws.onclose = () => {
-                term.write("\r\nConnection closed.\r\n");
-            };
-            
-            let commandBuffer = "";
-            term.onData(data => {
-                if (data === "\r") { // Enter key
-                    term.write("\r\n"); // Move to a new line
-                    ws.send(JSON.stringify({ type: "command", message: commandBuffer }));
-                    commandBuffer = ""; // Reset buffer after sending
-                } else if (data === "\u007F") { // Backspace key
-                    if (commandBuffer.length > 0) {
-                        commandBuffer = commandBuffer.slice(0, -1); // Remove last character
-                        term.write("\b \b"); // Move cursor back, erase character
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.type === "output") {
+                        term.write(data.message);
+                    } else if (data.type === "status") {
+                        term.write("\r\n" + data.message + "\r\n");
+                    } else if (data.type === "error") {
+                        term.write("\r\nError: " + data.message + "\r\n");
                     }
-                } else {
-                    commandBuffer += data;
-                    term.write(data); // Echo the typed character
-                }
-            });
+                };
+            
+                ws.onerror = () => {
+                    term.write("\r\nWebSocket connection error.\r\n");
+                };
+            
+                ws.onclose = () => {
+                    term.write("\r\nConnection closed.\r\n");
+                };
+            }
 
-
+            else{
+                alert("Wrong password!!!");
+            }
         }
     </script>
 </body>
