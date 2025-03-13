@@ -117,60 +117,35 @@
             const host = "";
             const username = "";
             const password = "";
-            const secretPasscode = document.getElementById('password').value;
+            const secret = document.getElementById('password').value;
+
+            document.getElementById('button1').className = "disabled";
+            document.getElementById('button1').onclick = ""
+            ws = new WebSocket("wss://sshterm.onrender.com"); // Replace with your backend WebSocket URL
             
-            async function getFileContents() {
-                try {
-                    const response = await fetch("https://sshterm.onrender.com/key"); // Update with your backend URL
-                    if (!response.ok) throw new Error("Failed to fetch file");
-                    const text = await response.text();
-                    console.log("File Contents:", text); // Log or use the file data
-                    return text; // Store text in a variable
-                } catch (error) {
-                    console.error("Error:", error);
+            ws.onopen = () => {
+                ws.send(JSON.stringify({ type: "connect", host, username, password, secret }));
+                term.write("\r\nConnecting to SSH...\r\n");
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === "output") {
+                    term.write(data.message);
+                } else if (data.type === "status") {
+                    term.write("\r\n" + data.message + "\r\n");
+                } else if (data.type === "error") {
+                    term.write("\r\nError: " + data.message + "\r\n");
                 }
-            }
-
-            getFileContents().then(fileData => {
-                console.log("Stored File Data:", fileData);
-                fileData = correctPassword
-            });
-
-
-            if (secretPasscode == correctPassword){
-                
-                alert("Correct password!!!");
-                document.getElementById('button1').className = "disabled";
-                ws = new WebSocket("wss://sshterm.onrender.com"); // Replace with your backend WebSocket URL
+            };
             
-                ws.onopen = () => {
-                    ws.send(JSON.stringify({ type: "connect", host, username, password }));
-                    term.write("\r\nConnecting to SSH...\r\n");
-                };
+            ws.onerror = () => {
+                term.write("\r\nWebSocket connection error.\r\n");
+            };
             
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    if (data.type === "output") {
-                        term.write(data.message);
-                    } else if (data.type === "status") {
-                        term.write("\r\n" + data.message + "\r\n");
-                    } else if (data.type === "error") {
-                        term.write("\r\nError: " + data.message + "\r\n");
-                    }
-                };
-            
-                ws.onerror = () => {
-                    term.write("\r\nWebSocket connection error.\r\n");
-                };
-            
-                ws.onclose = () => {
-                    term.write("\r\nConnection closed.\r\n");
-                };
-            }
-
-            else{
-                alert("Wrong password!!!");
-            }
+            ws.onclose = () => {
+                term.write("\r\nConnection closed.\r\n");
+            };
         }
     </script>
 </body>
