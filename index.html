@@ -117,26 +117,24 @@
             const host = "";
             const username = "";
             const password = "";
-            const secretPasscodeBox = document.getElementById('password');
-            const secretPasscode = secretPasscodeBox.value;
-            const key = 'https://sshterm.onrender.com/key';
+            const secretPasscode = document.getElementById('password').value;
+            
+            async function getFileContents() {
+                try {
+                    const response = await fetch("https://your-backend-url.onrender.com/file"); // Update with your backend URL
+                    if (!response.ok) throw new Error("Failed to fetch file");
+                    const text = await response.text();
+                    console.log("File Contents:", text); // Log or use the file data
+                    return text; // Store text in a variable
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+            }
 
-            fetch('https://sshterm.onrender.com/key')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.text(); // Or response.blob(), response.json(), etc. depending on the file type
-                })
-                .then(data => {
-                    // Process the file content
-                    console.log(data);
-                    data = correctPassword
-                })
-                .catch(error => {
-                    // Handle errors, e.g., network issues, CORS errors
-                    console.error('Fetch error:', error);
-                });
+            getFileContents().then(fileData => {
+                console.log("Stored File Data:", fileData);
+            });
+
 
             if (secretPasscode == correctPassword){
                 
