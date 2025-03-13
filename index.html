@@ -121,7 +121,24 @@
             const secretPasscode = secretPasscodeBox.value;
             const key = 'https://sshterm.onrender.com/key';
 
-            if (secretPasscode == key){
+            fetch('https://sshterm.onrender.com/key')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text(); // Or response.blob(), response.json(), etc. depending on the file type
+                })
+                .then(data => {
+                    // Process the file content
+                    console.log(data);
+                    data = correctPassword
+                })
+                .catch(error => {
+                    // Handle errors, e.g., network issues, CORS errors
+                    console.error('Fetch error:', error);
+                });
+
+            if (secretPasscode == correctPassword){
                 
                 alert("Correct password!!!");
                 document.getElementById('button1').className = "disabled";
