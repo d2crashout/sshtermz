@@ -57,10 +57,14 @@
         let ws;
         const term = new Terminal({
             cursorBlink: true,
+            cursorStyle: "block",
+            cursorInactiveStyle: "underline",
             fontSize: 14,
             theme: {
                 background: '#000000',
-                foreground: '#4AF626'  
+                foreground: '#4AF626',
+                cursor: '#FF0000',
+                cursorAccent: 'FFFF00'  
             }
         });
         const fitAddon = new FitAddon.FitAddon();
