@@ -119,8 +119,9 @@
             const password = "";
             const secretPasscodeBox = document.getElementById('password');
             const secretPasscode = secretPasscodeBox.value;
+            const key = 'https://sshterm.onrender.com/keys';
 
-            if (secretPasscode == 'amongus'){
+            if (secretPasscode == key){
                 
                 alert("Correct password!!!");
                 document.getElementById('button1').className = "disabled";
