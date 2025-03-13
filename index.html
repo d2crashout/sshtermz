@@ -34,6 +34,7 @@
             border-radius: 4px;
             transition-duration: 0.4s;
             margin: 20px;
+            font-family: "Comic Sans MS";
         }
 
         #button1:hover {
@@ -61,11 +62,16 @@
             opacity: 1;
             transition: 0s
         }
+
+        #password {
+            font-family: "Comic Sans MS";
+            border: 2px solid grey;
+        }
     </style>
 </head>
 <body>
     <h2>SSH Web Client</h2>
-    <input type="text" id="host" placeholder="Type in the secret passcode.">
+    <input type="text" id="password" placeholder="Type in the secret passcode.">
     <button onclick="connectSSH()" id="button1">Connect</button>
     
     <div id="terminal-container"></div>
