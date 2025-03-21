@@ -118,6 +118,7 @@
             const username = "";
             const password = "";
             const secret = document.getElementById('password').value;
+            let heartbeatInterval
 
             document.getElementById('button1').className = "disabled";
             document.getElementById('button1').onclick = ""
@@ -126,6 +127,11 @@
             ws.onopen = () => {
                 ws.send(JSON.stringify({ type: "connect", host, username, password, secret }));
                 term.write("\r\nConnecting to SSH...\r\n");
+
+                // Start heartbeat to keep connection alive
+                heartbeatInterval = setInterval(() => {
+                    ws.send(JSON.stringify({ type: "ping" }));
+                }, 30000);
             };
             
             ws.onmessage = (event) => {
@@ -144,6 +150,7 @@
             };
             
             ws.onclose = () => {
+                clearInterval(heartbeatInterval);
                 term.write("\r\nConnection closed.\r\n");
             };
         }
